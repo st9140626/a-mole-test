@@ -69,9 +69,6 @@
       color: #fff;
       cursor: pointer;
     }
-    button + button {
-      margin-left: 2rem;
-    }
   </style>
   
 </head>
@@ -82,7 +79,6 @@
   </div>
   <div>
     <button onclick="onStart()">開始遊戲</button>
-    <button onclick="onReset()">再來一局</button>
   </div>
   <script>
     var scoreNumber = 0;
@@ -104,12 +100,10 @@
           const randomNumber = randomRange({ min: 0, max: 8 })
           if (lastHoleIndex !== randomNumber) {
             lastHoleIndex = randomNumber
-            if (allMoles[randomNumber].classList.value.indexOf('show') === -1) {
+            if (!allMoles[randomNumber].classList.contains('show')) {
               allMoles[randomNumber].classList.add('show')
               setTimeout(() => {
-                if (allMoles[randomNumber].classList.value.indexOf('show') > -1) {
-                  allMoles[randomNumber].classList.remove('show')
-                }
+                removeMoleClass({ className: 'show', target: allMoles[randomNumber] })
               }, randomTime)
             }
           }
@@ -122,38 +116,46 @@
     const addScore = (e) => {
       const allMoles = document.querySelectorAll('.mole')
       const targetIndex = Number(e.target.id.replace('image-mole-', ''))
-      if (allMoles[targetIndex].classList.value.indexOf('show') > -1 && lastClickHoleIndex !== targetIndex) {
+      if (allMoles[targetIndex].classList.contains('show') && lastClickHoleIndex !== targetIndex) {
         lastClickHoleIndex = targetIndex
         allMoles[targetIndex].classList.add('hit')
         scoreNumber += 10;
-        scoreText.innerText = scoreNumber.toString();
+        setScoreText()
         setTimeout(() => {
-          allMoles[targetIndex].classList.remove('show')
-          allMoles[targetIndex].classList.remove('hit')
+          removeMoleClass({ className: 'show', target: allMoles[targetIndex] })
+          removeMoleClass({ className: 'hit', target: allMoles[targetIndex] })
         }, 500)
       }
     }
 
-    const onStart = () => {
-      scoreNumber = 0
-      scoreText.innerText = scoreNumber.toString();
-      if (gameTimes === 0) {
-        gameTimes = 16000;
-        showMole()
-        const gameTimeInterval = setInterval(() => {
-          gameTimes -= 1000
-          timeText.innerText = `${gameTimes / 1000}秒`
-          if (gameTimes === 0) {
-            clearInterval(gameTimeInterval)
-          }
-        }, 1000)
+    const removeMoleClass = ({ className = '', target = null }) => {
+      if (target.classList.contains(className)) {
+        target.classList.remove(className)
       }
     }
-    const onReset = () => {
-      if (gameTimes > 0) return
-      scoreNumber = 0;
+    
+    const setTimeText = () => {
+      timeText.innerText = `${gameTimes / 1000}秒`
+    }
+
+    const setScoreText = () => {
       scoreText.innerText = scoreNumber.toString();
-      onStart()
+    }
+
+    const onStart = () => {
+      if (gameTimes > 0) return
+      scoreNumber = 0
+      setScoreText()
+      gameTimes = 15000
+      setTimeText()
+      showMole()
+      const gameTimeInterval = setInterval(() => {
+        gameTimes -= 1000
+        setTimeText()
+        if (gameTimes === 0) {
+          clearInterval(gameTimeInterval)
+        }
+      }, 1000)
     }
 
     const initData = () => {
