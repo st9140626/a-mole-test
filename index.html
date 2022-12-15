@@ -24,6 +24,7 @@
       gap: 100px 20%;
       max-width: 800px;
       user-select: none;
+      cursor: crosshair;
     }
     .mole {
       position: relative;
@@ -32,13 +33,11 @@
       overflow: hidden;
     }
     .mole .image-mole {
-      width: calc(100% - 18px);
+      width: 100%;
       height: 100%;
       display: none;
       background: url('./mole.png') no-repeat center center;
       background-size: contain;
-      cursor: crosshair;
-      transform: translateX(12px);
     }
     .mole.show .image-mole {
       display: block;
@@ -57,7 +56,7 @@
       height: 30px;
       background: rgb(97, 65, 22);
       border-radius: 100px / 75px;
-      transform: translate(0, 50%);
+      transform: translate(0, 30%);
     }
     button {
       font-size: 1rem;
@@ -77,11 +76,11 @@
   
 </head>
 <body>
-  <div class="game-title">您的分數：<span id="score-text">0</span></div>
-  <div class="game-time">遊戲時間：<span id="time-text">10秒</span></div>
+  <div class="game-title">您的分數：<span id="score-text">-</span></div>
+  <div class="game-time">遊戲時間：<span id="time-text">-</span></div>
   <div id="garden">
   </div>
-  <div id="control-btn-list">
+  <div>
     <button onclick="onStart()">開始遊戲</button>
     <button onclick="onReset()">再來一局</button>
   </div>
@@ -94,8 +93,31 @@
     }
 
     const scoreText = document.getElementById('score-text');
-    const timeText = document.getElementById('time-text');
+    const timeText = document.getElementById('time-text'); 
     
+    var lastHoleIndex = -1;  
+    const showMole = () => {
+      const allMoles = document.querySelectorAll('.mole')
+      const randomTime = randomRange({ min: 1000, max: 2000 })
+      setTimeout(() => {
+        if (gameTimes > 0) {
+          const randomNumber = randomRange({ min: 0, max: 8 })
+          if (lastHoleIndex !== randomNumber) {
+            lastHoleIndex = randomNumber
+            if (allMoles[randomNumber].classList.value.indexOf('show') === -1) {
+              allMoles[randomNumber].classList.add('show')
+              setTimeout(() => {
+                if (allMoles[randomNumber].classList.value.indexOf('show') > -1) {
+                  allMoles[randomNumber].classList.remove('show')
+                }
+              }, randomTime)
+            }
+          }
+          showMole()
+        }
+      }, randomTime)
+    }
+
     var lastClickHoleIndex = -1
     const addScore = (e) => {
       const allMoles = document.querySelectorAll('.mole')
@@ -111,56 +133,27 @@
         }, 500)
       }
     }
-    const onReset = () => {
-      if (gameTimes > 0) return
-      scoreNumber = 0;
-      scoreText.innerText = scoreNumber.toString();
-      onStart()
-    }
-    
+
     const onStart = () => {
       scoreNumber = 0
       scoreText.innerText = scoreNumber.toString();
       if (gameTimes === 0) {
-        gameTimes = 15000;
+        gameTimes = 16000;
         showMole()
         const gameTimeInterval = setInterval(() => {
           gameTimes -= 1000
           timeText.innerText = `${gameTimes / 1000}秒`
           if (gameTimes === 0) {
             clearInterval(gameTimeInterval)
-            const allMoles = document.querySelectorAll('.mole')
-            allMoles.forEach(moleItem => {
-              if (moleItem.classList.value.indexOf('show') > -1) {
-                moleItem.classList.remove('show')
-              }
-            })
           }
         }, 1000)
       }
     }
-    
-    var lastHoleIndex = -1;  
-    const showMole = () => {
-      const allMoles = document.querySelectorAll('.mole')
-      const randomTime = randomRange({ min: 500, max: 1500 })
-      setTimeout(() => {
-        if (gameTimes > 0) {
-          const randomNumber = randomRange({ min: 0, max: 8 })
-          if (lastHoleIndex !== randomNumber) {
-            lastHoleIndex = randomNumber
-            if (allMoles[randomNumber].classList.value.indexOf('show') === -1) {
-              allMoles[randomNumber].classList.add('show')
-              setTimeout(() => {
-                if (allMoles[randomNumber].classList.value.indexOf('show') > -1) {
-                  allMoles[randomNumber].classList.remove('show')
-                }
-              }, randomRange({ min: 1000, max: 2000 }))
-            }
-          }
-          showMole()
-        }
-      }, randomTime)
+    const onReset = () => {
+      if (gameTimes > 0) return
+      scoreNumber = 0;
+      scoreText.innerText = scoreNumber.toString();
+      onStart()
     }
 
     const initData = () => {
