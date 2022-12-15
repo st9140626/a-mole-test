@@ -120,6 +120,7 @@
     
     const onStart = () => {
       scoreNumber = 0
+      scoreText.innerText = scoreNumber.toString();
       if (gameTimes === 0) {
         gameTimes = 15000;
         showMole()
